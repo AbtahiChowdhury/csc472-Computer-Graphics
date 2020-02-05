@@ -63,6 +63,10 @@ void
 HW1a::initializeGL()
 {
 	// PUT YOUR CODE HERE
+	initializeGLFunctions();
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glColor3f(1.0F, 1.0f, 1.0f);
 }
 
 
@@ -76,7 +80,23 @@ HW1a::initializeGL()
 void
 HW1a::resizeGL(int w, int h)
 {
-	// PUT YOUR CODE HERE
+	float xmax, ymax;
+	float ar = (float)w / h;
+	if (ar > 1.0) {
+		xmax = ar;
+		ymax = 1.;
+	}
+	else {
+		xmax = 1.;
+		ymax = 1 / ar;
+	}
+
+	glViewport(0, 0, w, h);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -90,6 +110,29 @@ void
 HW1a::paintGL()
 {
 	// PUT YOUR CODE HERE
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	float Offset[] = {
+		-0.66f,
+		0,
+		0.66f,
+	};
+
+	// define polygon
+	for (int i = 0; i < 9; i++)
+	{
+		float offsetx = Offset[i % 3], offsety = Offset[i / 3];
+		glBegin(DrawModes[i]);
+			for (int i = 0; i < 32; i += 2)
+			{
+				float vx = (Vertices[i] / 3) + offsetx, vy = (Vertices[i + 1] / 3) + offsety;
+				glVertex2f(vx, vy);
+			}
+		glEnd();
+	}
 }
 
 
