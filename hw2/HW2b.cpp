@@ -74,6 +74,34 @@ void
 HW2b::resizeGL(int w, int h)
 {
 	// PUT YOUR CODE HERE
+
+	// save window dimensions
+	m_winW = w;
+	m_winH = h;
+
+	// compute aspect ratio
+	float ar = (float)w / h;
+
+	// set xmax, ymax;
+	float xmax, ymax;
+	if (ar > 1.0) {		// wide screen
+		xmax = ar;
+		ymax = 1.;
+	}
+	else {		// tall screen
+		xmax = 1.;
+		ymax = 1 / ar;
+	}
+
+	// set viewport to occupy full canvas
+	glViewport(0, 0, w, h);
+
+	// compute orthographic projection from viewing coordinates;
+	// we use Qt's 4x4 matrix class in place of legacy OpenGL code:
+	// glLoadIdentity();
+	// glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+	m_projection.setToIdentity();
+	m_projection.ortho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -87,6 +115,29 @@ void
 HW2b::paintGL()
 {
 	// PUT YOUR CODE HERE
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
+	glEnableVertexAttribArray(ATTRIB_COLOR);
+	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glUseProgram(m_program[HW2B].programId());
+
+	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
+	glUniformMatrix4fv(m_uniform[HW2B][MV], 1, GL_FALSE, m_modelview.constData());
+	glUniform1f(m_uniform[HW2B][THETA], m_theta);
+	glUniform1i(m_uniform[HW2B][TWIST], m_twist);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_numPoints);
+
+	glUseProgram(0);
+	glDisableVertexAttribArray(ATTRIB_COLOR);
+	glDisableVertexAttribArray(ATTRIB_VERTEX);
 }
 
 
@@ -266,6 +317,20 @@ void
 HW2b::divideTriangle(vec2 a, vec2 b, vec2 c, int count)
 {
 	// PUT YOUR CODE HERE
+	if (count > 0)
+	{
+		vec2 ab = vec2((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0);		// Get left midpoint
+		vec2 ac = vec2((a[0] + c[0]) / 2.0, (a[1] + c[1]) / 2.0);		// Get right midpoint
+		vec2 bc = vec2((b[0] + c[0]) / 2.0, (b[1] + c[1]) / 2.0);		// Get bottom midpoint
+		divideTriangle(a, ab, ac, count - 1);							// Divide top triangle into sub-triangles
+		divideTriangle(b, bc, ab, count - 1);							// Divide right triangle into sub-triangles
+		divideTriangle(c, ac, bc, count - 1);							// Divide left triangle into sub-triangles
+		divideTriangle(ab, ac, bc, count - 1);							// Divide middle triangle into sub-triangles
+	}
+	else
+	{
+		triangle(a, b, c);
+	}
 }
 
 

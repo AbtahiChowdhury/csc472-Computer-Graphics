@@ -13,4 +13,21 @@ uniform	int	u_Twist;	// Twist flag
 void main() 
 {
 	// PUT YOUR CODE HERE
+	if (u_Twist == 1)
+	{
+		float d = sqrt(a_Position[0]*a_Position[0] + a_Position[1]*a_Position[1]);
+		float sinTheta = sin(d*u_Theta);
+		float cosTheta = cos(d*u_Theta);
+		vec2 p = vec2(a_Position[0]*cosTheta - a_Position[1]*sinTheta, a_Position[1]*cosTheta + a_Position[0]*sinTheta);
+		gl_Position = u_Projection * u_Modelview * vec4(p, 0, 1);
+	}
+	else
+	{
+		float sinTheta = sin(u_Theta);
+		float cosTheta = cos(u_Theta);
+		vec2 p = vec2(a_Position[0]*cosTheta - a_Position[1]*sinTheta, a_Position[1]*cosTheta + a_Position[0]*sinTheta);
+		gl_Position = u_Projection * u_Modelview * vec4(p, 0, 1);
+	}
+
+	v_Color = vec4(a_Color, 1);
 }
