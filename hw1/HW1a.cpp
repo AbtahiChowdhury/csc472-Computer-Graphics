@@ -83,6 +83,8 @@ HW1a::resizeGL(int w, int h)
     // PUT YOUR CODE HERE
     float xmax, ymax;
     float ar = (float)w / h;
+    m_winW = w;
+    m_winH = h;
     if (ar > 1.0) {
         xmax = ar;
         ymax = 1.;
@@ -114,46 +116,21 @@ HW1a::paintGL()
     // PUT YOUR CODE HERE
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+//    glMatrixMode(GL_MODELVIEW);
+//    glLoadIdentity();
+    int width = m_winW/3;
+    int height = m_winH/3;
+    printf("width is %d\n", width);
+    printf("width is %d\n", height);
 
-//    float Offset[] = {
-//        -0.66f,
-//        0,
-//        0.66f,
-//    };
-    
-    // define polygon
-    GLint vp [4];
-    glGetIntegerv (GL_VIEWPORT, vp);
-    int pos[] = {0, 0, (int)(vp[2]*.66), vp[3], (int)(QWidget::width()*0.66), 0, vp[2], vp[3],  QWidget::width(), 0, vp[2], vp[3], 0, (int)(QWidget::height()*0.66), vp[2], vp[3], (int)(QWidget::width()*0.66), (int)(QWidget::height()*0.66), vp[2], vp[3],QWidget::width(), (int)(QWidget::height()*0.66), vp[2], vp[3],0, vp[2], (int)(QWidget::width()*0.66), (int)(QWidget::height()*0.66),(int)(QWidget::width()*0.66), vp[3], (int)(QWidget::width()*0.66), (int)(QWidget::height()*0.66),QWidget::width(), vp[3], (int)(QWidget::width()*0.66), (int)(QWidget::height()*0.66)};
-    printf("height is %d\n", vp[3]);
-
-    int count = 0;
-    for (int i = 0; i < 36; i += 4)
-    {
-//        float offsetx = Offset[i % 3], offsety = Offset[i / 3];
-            glViewport(pos[i], pos[i+1], pos[i+2], pos[i+3]);
-
-        
-            printf("Pos ouput is : %d, %d, %d, %d\n", pos[i], pos[i+1], pos[i+2], pos[i+3]);
-
-            glBegin(DrawModes[count]);
-
-            count++;
-            for (int j = 0; j < 32; j += 2)
-            {
-//                float vx = (Vertices[i] / 3) + offsetx, vy = (Vertices[i + 1] / 3) + offsety;
-                
-//                glLoadIdentity();
-
-                glVertex2f(Vertices[j], Vertices[j+1]);
-                glViewport(0, 0, QWidget::width(), QWidget::height());
-
-            }
+    for(int i = 0; i < 9; i++){
+        glViewport(((i%3)*width), ((i/3)*height), width, height);
+        glBegin(DrawModes[i]);
+        for (int j = 0; j < 32; j += 2){
+            glVertex2f(Vertices[j], Vertices[j+1]);
+        }
         glEnd();
     }
-
 }
 
 
