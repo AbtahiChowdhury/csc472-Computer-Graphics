@@ -11,34 +11,34 @@
 
 // init array of 16 vertices for letter 'P'
 float Vertices[] = {
-	-0.5f , -0.75f,
-	-0.5f , -0.5f,
-	-0.5f , -0.25f,
-	-0.5f ,  0.0f,
-	-0.5f ,  0.25f,
-	-0.5f ,  0.5f,
-	-0.25f,  0.75f,
-	 0.0f ,  0.75f,
-	 0.25f,  0.75f,
-	 0.5f ,  0.75f,
-	 0.75f,  0.5f,
-	 0.75f,  0.25f,
-	 0.5f ,  0.0f,
-	 0.25f,  0.0f,
-	 0.0f ,  0.0f,
-	-0.25f,  0.0f
+    -0.5f , -0.75f,
+    -0.5f , -0.5f,
+    -0.5f , -0.25f,
+    -0.5f ,  0.0f,
+    -0.5f ,  0.25f,
+    -0.5f ,  0.5f,
+    -0.25f,  0.75f,
+     0.0f ,  0.75f,
+     0.25f,  0.75f,
+     0.5f ,  0.75f,
+     0.75f,  0.5f,
+     0.75f,  0.25f,
+     0.5f ,  0.0f,
+     0.25f,  0.0f,
+     0.0f ,  0.0f,
+    -0.25f,  0.0f
 };
 
 static int DrawModes[] = {
-	GL_POINTS,
-	GL_LINES,
-	GL_LINE_STRIP,
-	GL_LINE_LOOP,
-	GL_TRIANGLES,
-	GL_TRIANGLE_STRIP,
-	GL_TRIANGLE_FAN,
-	GL_QUADS,
-	GL_POLYGON
+    GL_POINTS,
+    GL_LINES,
+    GL_LINE_STRIP,
+    GL_LINE_LOOP,
+    GL_TRIANGLES,
+    GL_TRIANGLE_STRIP,
+    GL_TRIANGLE_FAN,
+    GL_QUADS,
+    GL_POLYGON
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,7 +47,7 @@ static int DrawModes[] = {
 // HW1a constructor.
 //
 HW1a::HW1a(const QGLFormat &glf, QWidget *parent)
-	: HW(glf, parent)
+    : HW(glf, parent)
 {
 }
 
@@ -62,11 +62,11 @@ HW1a::HW1a(const QGLFormat &glf, QWidget *parent)
 void
 HW1a::initializeGL()
 {
-	// PUT YOUR CODE HERE
-	initializeGLFunctions();
+    // PUT YOUR CODE HERE
+    initializeGLFunctions();
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glColor3f(1.0F, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glColor3f(1.0F, 1.0f, 1.0f);
 }
 
 
@@ -80,23 +80,27 @@ HW1a::initializeGL()
 void
 HW1a::resizeGL(int w, int h)
 {
-	float xmax, ymax;
-	float ar = (float)w / h;
-	if (ar > 1.0) {
-		xmax = ar;
-		ymax = 1.;
-	}
-	else {
-		xmax = 1.;
-		ymax = 1 / ar;
-	}
+    // PUT YOUR CODE HERE
+    float xmax, ymax;
+    float ar = (float)w / h;
+    m_winW = w;
+    m_winH = h;
+    if (ar > 1.0) {
+        xmax = ar;
+        ymax = 1.;
+    }
+    else {
+        xmax = 1.;
+        ymax = 1 / ar;
+    }
 
-	glViewport(0, 0, w, h);
+    glViewport(0, 0, w, h);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-	glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+    glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+
 }
 
 
@@ -109,30 +113,24 @@ HW1a::resizeGL(int w, int h)
 void
 HW1a::paintGL()
 {
-	// PUT YOUR CODE HERE
-	glClear(GL_COLOR_BUFFER_BIT);
+    // PUT YOUR CODE HERE
+    glClear(GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+//    glMatrixMode(GL_MODELVIEW);
+//    glLoadIdentity();
+    int width = m_winW/3;
+    int height = m_winH/3;
+    printf("width is %d\n", width);
+    printf("width is %d\n", height);
 
-	float Offset[] = {
-		-0.66f,
-		0,
-		0.66f,
-	};
-
-	// define polygon
-	for (int i = 0; i < 9; i++)
-	{
-		float offsetx = Offset[i % 3], offsety = Offset[i / 3];
-		glBegin(DrawModes[i]);
-			for (int i = 0; i < 32; i += 2)
-			{
-				float vx = (Vertices[i] / 3) + offsetx, vy = (Vertices[i + 1] / 3) + offsety;
-				glVertex2f(vx, vy);
-			}
-		glEnd();
-	}
+    for(int i = 0; i < 9; i++){
+        glViewport(((i%3)*width), ((i/3)*height), width, height);
+        glBegin(DrawModes[i]);
+        for (int j = 0; j < 32; j += 2){
+            glVertex2f(Vertices[j], Vertices[j+1]);
+        }
+        glEnd();
+    }
 }
 
 
@@ -145,9 +143,9 @@ HW1a::paintGL()
 QGroupBox*
 HW1a::controlPanel()
 {
-	// init group box
-	QGroupBox *groupBox = new QGroupBox("Homework 1a");
-	groupBox->setStyleSheet(GroupBoxStyle);
+    // init group box
+    QGroupBox *groupBox = new QGroupBox("Homework 1a");
+    groupBox->setStyleSheet(GroupBoxStyle);
 
-	return(groupBox);
+    return(groupBox);
 }
