@@ -116,18 +116,16 @@ HW1a::paintGL()
     // PUT YOUR CODE HERE
     glClear(GL_COLOR_BUFFER_BIT);
 
-//    glMatrixMode(GL_MODELVIEW);
-//    glLoadIdentity();
-    int width = m_winW/3;
-    int height = m_winH/3;
+    int width = m_winW/3;				// Get width of sub-viewports
+    int height = m_winH/3;				// Get height of sub-viewports
     printf("width is %d\n", width);
     printf("width is %d\n", height);
 
     for(int i = 0; i < 9; i++){
-        glViewport(((i%3)*width), ((i/3)*height), width, height);
-        glBegin(DrawModes[i]);
+        glViewport(((i%3)*width), ((i/3)*height), width, height);		// Create sub-viewport
+        glBegin(DrawModes[i]);											// Select draw mode
         for (int j = 0; j < 32; j += 2){
-            glVertex2f(Vertices[j], Vertices[j+1]);
+            glVertex2f(Vertices[j], Vertices[j+1]);						// Add vertices to be drawn
         }
         glEnd();
     }
