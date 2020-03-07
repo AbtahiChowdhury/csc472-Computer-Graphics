@@ -116,28 +116,35 @@ HW2b::paintGL()
 {
 	// PUT YOUR CODE HERE
 
+	// Clear Screen
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	// Bind vertex buffer and enable access to it
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
 	glEnableVertexAttribArray(ATTRIB_VERTEX);
-	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, NULL);
 
+	// Bind color buffer and enable access to it
 	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
 	glEnableVertexAttribArray(ATTRIB_COLOR);
-	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, false, 0, NULL);
 
+	// Use GLSL shader program
 	glUseProgram(m_program[HW2B].programId());
 
+	// Send uniform variables to the vertex shader
 	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
 	glUniformMatrix4fv(m_uniform[HW2B][MV], 1, GL_FALSE, m_modelview.constData());
-	glUniform1f(m_uniform[HW2B][THETA], m_theta);
 	glUniform1i(m_uniform[HW2B][TWIST], m_twist);
+	glUniform1i(m_uniform[HW2B][THETA], m_theta);
 
+	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, m_numPoints);
 
+	// End GLSL shader program after drawing
 	glUseProgram(0);
-	glDisableVertexAttribArray(ATTRIB_COLOR);
 	glDisableVertexAttribArray(ATTRIB_VERTEX);
+	glDisableVertexAttribArray(ATTRIB_COLOR);
 }
 
 
@@ -292,6 +299,10 @@ HW2b::initVertexBuffer()
 	// store vertex positions and colors in m_points and m_colors, respectively
 	divideTriangle(vertices[0], vertices[1], vertices[2], m_subdivisions);
 	m_numPoints = (int) m_points.size();		// save number of vertices
+
+	// Generate vertex and color buffers in GPU
+	glGenBuffers(1, &m_vertexBuffer);
+	glGenBuffers(1, &m_colorBuffer);
 
 	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
