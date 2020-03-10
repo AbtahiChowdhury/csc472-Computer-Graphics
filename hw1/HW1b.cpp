@@ -86,10 +86,10 @@ void
 HW1b::paintGL()
 {
 	// PUT YOUR CODE HERE
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);										// Clear color buffer
 	for (int i=0, j=0; i<m_colors.size(); i++)
 	{
-		glColor3f(m_colors[i][0], m_colors[i][1], m_colors[i][2]);
+		glColor3f(m_colors[i][0], m_colors[i][1], m_colors[i][2]);		// Get color for current triangle
 		glBegin(GL_TRIANGLES);
 			glVertex2f(m_points[j][0], m_points[j][1]);
 			j++;
@@ -240,17 +240,17 @@ HW1b::divideTriangle(vec2 a, vec2 b, vec2 c, int count)
 	// PUT YOUR CODE HERE
 	if (count > 0)
 	{
-		vec2 ab = vec2((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0);
-		vec2 ac = vec2((a[0] + c[0]) / 2.0, (a[1] + c[1]) / 2.0);
-		vec2 bc = vec2((b[0] + c[0]) / 2.0, (b[1] + c[1]) / 2.0);
-		divideTriangle(a, ab, ac, count - 1);
-		divideTriangle(b, bc, ab, count - 1);
-		divideTriangle(c, ac, bc, count - 1);
-		divideTriangle(ab, ac, bc, count - 1);
+		vec2 ab = vec2((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0);		// Get left midpoint
+		vec2 ac = vec2((a[0] + c[0]) / 2.0, (a[1] + c[1]) / 2.0);		// Get right midpoint
+		vec2 bc = vec2((b[0] + c[0]) / 2.0, (b[1] + c[1]) / 2.0);		// Get bottom midpoint
+		divideTriangle(a, ab, ac, count - 1);							// Divide top triangle into sub-triangles
+		divideTriangle(b, bc, ab, count - 1);							// Divide right triangle into sub-triangles
+		divideTriangle(c, ac, bc, count - 1);							// Divide left triangle into sub-triangles
+		divideTriangle(ab, ac, bc, count - 1);							// Divide middle triangle into sub-triangles
 	}
 	else
 	{
-		triangle(a, b, c);
+		triangle(a, b, c);												// Reached required number of subdivisions
 	}
 }
 

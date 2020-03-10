@@ -74,6 +74,34 @@ void
 HW2b::resizeGL(int w, int h)
 {
 	// PUT YOUR CODE HERE
+
+	// save window dimensions
+	m_winW = w;
+	m_winH = h;
+
+	// compute aspect ratio
+	float ar = (float)w / h;
+
+	// set xmax, ymax;
+	float xmax, ymax;
+	if (ar > 1.0) {		// wide screen
+		xmax = ar;
+		ymax = 1.;
+	}
+	else {		// tall screen
+		xmax = 1.;
+		ymax = 1 / ar;
+	}
+
+	// set viewport to occupy full canvas
+	glViewport(0, 0, w, h);
+
+	// compute orthographic projection from viewing coordinates;
+	// we use Qt's 4x4 matrix class in place of legacy OpenGL code:
+	// glLoadIdentity();
+	// glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+	m_projection.setToIdentity();
+	m_projection.ortho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -87,6 +115,36 @@ void
 HW2b::paintGL()
 {
 	// PUT YOUR CODE HERE
+
+	// Clear Screen
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Bind vertex buffer and enable access to it
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, NULL);
+
+	// Bind color buffer and enable access to it
+	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
+	glEnableVertexAttribArray(ATTRIB_COLOR);
+	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, false, 0, NULL);
+
+	// Use GLSL shader program
+	glUseProgram(m_program[HW2B].programId());
+
+	// Send uniform variables to the vertex shader
+	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
+	glUniformMatrix4fv(m_uniform[HW2B][MV], 1, GL_FALSE, m_modelview.constData());
+	glUniform1i(m_uniform[HW2B][TWIST], m_twist);
+	glUniform1i(m_uniform[HW2B][THETA], m_theta);
+
+	// Draw triangles
+	glDrawArrays(GL_TRIANGLES, 0, m_numPoints);
+
+	// End GLSL shader program after drawing
+	glUseProgram(0);
+	glDisableVertexAttribArray(ATTRIB_VERTEX);
+	glDisableVertexAttribArray(ATTRIB_COLOR);
 }
 
 
@@ -242,6 +300,10 @@ HW2b::initVertexBuffer()
 	divideTriangle(vertices[0], vertices[1], vertices[2], m_subdivisions);
 	m_numPoints = (int) m_points.size();		// save number of vertices
 
+	// Generate vertex and color buffers in GPU
+	glGenBuffers(1, &m_vertexBuffer);
+	glGenBuffers(1, &m_colorBuffer);
+
 	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec2), &m_points[0], GL_STATIC_DRAW);
@@ -266,6 +328,20 @@ void
 HW2b::divideTriangle(vec2 a, vec2 b, vec2 c, int count)
 {
 	// PUT YOUR CODE HERE
+	if (count > 0)
+	{
+		vec2 ab = vec2((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0);		// Get left midpoint
+		vec2 ac = vec2((a[0] + c[0]) / 2.0, (a[1] + c[1]) / 2.0);		// Get right midpoint
+		vec2 bc = vec2((b[0] + c[0]) / 2.0, (b[1] + c[1]) / 2.0);		// Get bottom midpoint
+		divideTriangle(a, ab, ac, count - 1);							// Divide top triangle into sub-triangles
+		divideTriangle(b, bc, ab, count - 1);							// Divide right triangle into sub-triangles
+		divideTriangle(c, ac, bc, count - 1);							// Divide left triangle into sub-triangles
+		divideTriangle(ab, ac, bc, count - 1);							// Divide middle triangle into sub-triangles
+	}
+	else
+	{
+		triangle(a, b, c);
+	}
 }
 
 
