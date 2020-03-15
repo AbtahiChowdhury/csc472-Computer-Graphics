@@ -7,8 +7,8 @@ out	vec4	v_Color;	// varying variable for passing color to fragment shader
 
 uniform	mat4	u_Modelview;	// uniform variable for passing modelview  matrix
 uniform	mat4	u_Projection;	// uniform variable for passing projection matrix
-uniform	float	u_Theta;	// Theta parameter
-uniform	int	u_Twist;	// Twist flag
+uniform	float	u_Theta;		// Theta parameter
+uniform	int		u_Twist;		// Twist flag
 
 void main() 
 {
@@ -18,14 +18,10 @@ void main()
 		float d = sqrt(a_Position[0]*a_Position[0] + a_Position[1]*a_Position[1]);
 		float sinTheta = sin(d*u_Theta);
 		float cosTheta = cos(d*u_Theta);
-		vec2 p = vec2(a_Position[0]*cosTheta - a_Position[1]*sinTheta, a_Position[0]*sinTheta + a_Position[1]*cosTheta);
-		gl_Position = u_Projection * vec4(p, 0, 1);
+		gl_Position = u_Projection * vec4(a_Position[0]*cosTheta - a_Position[1]*sinTheta, a_Position[0]*sinTheta + a_Position[1]*cosTheta, 0, 1);
 	}
 	else
 	{
-		//float sinTheta = sin(u_Theta);
-		//float cosTheta = cos(u_Theta);
-		//vec2 p = vec2(a_Position[0]*cosTheta - a_Position[1]*sinTheta, a_Position[1]*cosTheta + a_Position[0]*sinTheta);
 		gl_Position = u_Projection * u_Modelview * vec4(a_Position, 0, 1);
 	}
 
