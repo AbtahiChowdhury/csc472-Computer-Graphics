@@ -100,6 +100,7 @@ HW2b::resizeGL(int w, int h)
 	// we use Qt's 4x4 matrix class in place of legacy OpenGL code:
 	// glLoadIdentity();
 	// glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+	m_modelview.setToIdentity();
 	m_projection.setToIdentity();
 	m_projection.ortho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
@@ -119,32 +120,23 @@ HW2b::paintGL()
 	// Clear Screen
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// Bind vertex buffer and enable access to it
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-	glEnableVertexAttribArray(ATTRIB_VERTEX);
-	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, NULL);
-
-	// Bind color buffer and enable access to it
-	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
-	glEnableVertexAttribArray(ATTRIB_COLOR);
-	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, false, 0, NULL);
+	// Enable shader program
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 	// Use GLSL shader program
 	glUseProgram(m_program[HW2B].programId());
 
 	// Send uniform variables to the vertex shader
-	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
 	glUniformMatrix4fv(m_uniform[HW2B][MV], 1, GL_FALSE, m_modelview.constData());
+	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
+	glUniform1f(m_uniform[HW2B][THETA], m_theta);
 	glUniform1i(m_uniform[HW2B][TWIST], m_twist);
-	glUniform1i(m_uniform[HW2B][THETA], m_theta);
 
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, m_numPoints);
 
-	// End GLSL shader program after drawing
-	glUseProgram(0);
-	glDisableVertexAttribArray(ATTRIB_VERTEX);
-	glDisableVertexAttribArray(ATTRIB_COLOR);
+	// Disable shader program
+	glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }
 
 
@@ -307,10 +299,14 @@ HW2b::initVertexBuffer()
 	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec2), &m_points[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, 0);
 
 	// bind color buffer to the GPU and copy the colors from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec3), &m_colors[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(ATTRIB_COLOR);
+	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, false, 0, 0);
 
 	// clear vertex and color vectors because they have already been copied into GPU
 	m_points.clear();
