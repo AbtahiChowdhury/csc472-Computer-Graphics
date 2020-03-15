@@ -58,6 +58,8 @@ HW1b::resizeGL(int w, int h)
 	// PUT YOUR CODE HERE
 	float xmax, ymax;
 	float ar = (float)w / h;
+    m_winW = w;
+    m_winH = h;
 	if (ar > 1.0) {
 		xmax = ar;
 		ymax = 1.;
@@ -123,7 +125,7 @@ HW1b::controlPanel()
 
 	// init sliders
 	m_sliderTheta ->setRange(0, 360);
-	m_sliderTheta ->setValue(0);
+	m_sliderTheta ->setValue(m_theta);
 	m_sliderSubdiv->setRange(0, 6);
 	m_sliderSubdiv->setValue(m_subdivisions);
 
@@ -144,9 +146,11 @@ HW1b::controlPanel()
 	layout->addWidget(label[0],	   0, 0);
 	layout->addWidget(m_sliderTheta,   0, 1);
 	layout->addWidget(m_spinBoxTheta,  0, 2);
+    
 	layout->addWidget(label[1],	   1, 0);
 	layout->addWidget(m_sliderSubdiv,  1, 1);
 	layout->addWidget(m_spinBoxSubdiv, 1, 2);
+    
 	layout->addWidget(m_checkBoxTwist, 2, 0);
 
 	// assign layout to group box

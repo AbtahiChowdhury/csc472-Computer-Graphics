@@ -16,15 +16,15 @@ enum { HW2A };
 enum { PROJ };
 
 const int DrawModes[] = {
-	GL_POINTS,
-	GL_LINES,
-	GL_LINE_STRIP,
-	GL_LINE_LOOP,
-	GL_TRIANGLES,
-	GL_TRIANGLE_STRIP,
-	GL_TRIANGLE_FAN,
-	GL_QUADS,
-	GL_POLYGON
+    GL_POINTS,
+    GL_LINES,
+    GL_LINE_STRIP,
+    GL_LINE_LOOP,
+    GL_TRIANGLES,
+    GL_TRIANGLE_STRIP,
+    GL_TRIANGLE_FAN,
+    GL_QUADS,
+    GL_POLYGON
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,18 +46,18 @@ HW2a::HW2a(const QGLFormat &glf, QWidget *parent) : HW(glf, parent)
 void
 HW2a::initializeGL()
 {
-	// initialize GL function resolution for current context
-	initializeGLFunctions();
+    // initialize GL function resolution for current context
+    initializeGLFunctions();
 
-	// init vertex and fragment shaders
-	initShaders();
+    // init vertex and fragment shaders
+    initShaders();
 
-	// initialize vertex buffer and write positions to vertex shader
-	initVertexBuffer();
+    // initialize vertex buffer and write positions to vertex shader
+    initVertexBuffer();
 
-	// init state variables
-	glClearColor(0.0, 0.0, 0.0, 0.0);	// set background color
-	glColor3f   (1.0, 1.0, 0.0);		// set foreground color
+    // init state variables
+    glClearColor(0.0, 0.0, 0.0, 0.0);    // set background color
+    glColor3f   (1.0, 1.0, 0.0);        // set foreground color
 }
 
 
@@ -71,7 +71,25 @@ HW2a::initializeGL()
 void
 HW2a::resizeGL(int w, int h)
 {
-	// PUT YOUR CODE HERE
+    float xmax, ymax;
+    float ar = (float)w / h;
+    m_winW = w;
+    m_winH = h;
+    if (ar > 1.0) {
+        xmax = ar;
+        ymax = 1.;
+    }
+    else {
+        xmax = 1.;
+        ymax = 1 / ar;
+    }
+
+    glViewport(0, 0, w, h);
+
+    // compute orthographic projection from viewing coordinates;
+    // we use Qt's 4x4 matrix class in place of legacy OpenGL code:
+    m_projection.setToIdentity();
+    m_projection.ortho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -84,37 +102,43 @@ HW2a::resizeGL(int w, int h)
 void
 HW2a::paintGL()
 {
-	// clear canvas with background color
-	glClear(GL_COLOR_BUFFER_BIT);
-	
-	// enable vertex shader point size adjustment
-	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    // clear canvas with background color
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    // enable vertex shader point size adjustment
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
-	// draw data in nine viewports after splitting canvas into 3x3 cells;
-	// a different drawing mode is used in each viewport
-	// ********************
-	// *      *     *     *
-	// *   7  *  8  *  9  *
-	// *      *     *     *
-	// ********************
-	// *      *     *     *
-	// *   4  *  5  *  6  *
-	// *      *     *     *
-	// ********************
-	// *      *     *     *
-	// *   1  *  2  *  3  *
-	// *      *     *     *
-	// ********************
+    // draw data in nine viewports after splitting canvas into 3x3 cells;
+    // a different drawing mode is used in each viewport
+    // ********************
+    // *      *     *     *
+    // *   7  *  8  *  9  *
+    // *      *     *     *
+    // ********************
+    // *      *     *     *
+    // *   4  *  5  *  6  *
+    // *      *     *     *
+    // ********************
+    // *      *     *     *
+    // *   1  *  2  *  3  *
+    // *      *     *     *
+    // ********************
 
-	// viewport dimensions
-	int w = m_winW / 3;
-	int h = m_winH / 3;
+    // viewport dimensions
+    int w = m_winW / 3;
+    int h = m_winH / 3;
 
-	// use glsl program
-	// PUT YOUR CODE HERE
-
-	// disable vertex shader point size adjustment
-	glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    // use glsl program
+    glUseProgram(m_program[HW2A].programId());
+    glUniformMatrix4fv(m_uniform[HW2A][PROJ], 1, GL_FALSE, m_projection.constData());
+    // PUT YOUR CODE HERE
+    for(int i = 0; i < 9; i++){
+        glViewport((i%3)*w, (i/3)*h, w, h);
+        glDrawArrays(DrawModes[i], 0, m_vertNum);
+        
+    }
+    // disable vertex shader point size adjustment
+    glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }
 
 
@@ -127,10 +151,10 @@ HW2a::paintGL()
 QGroupBox*
 HW2a::controlPanel()
 {
-	// init group box
-	QGroupBox *groupBox = new QGroupBox("Homework 2a");
-	groupBox->setStyleSheet(GroupBoxStyle);
-	return(groupBox);
+    // init group box
+    QGroupBox *groupBox = new QGroupBox("Homework 2a");
+    groupBox->setStyleSheet(GroupBoxStyle);
+    return(groupBox);
 }
 
 
@@ -156,12 +180,12 @@ void
 HW2a::initShaders()
 {
 
-	// init uniforms hash table based on uniform variable names and location IDs
-	UniformMap uniforms;
-	uniforms["u_Projection"] = PROJ;
+    // init uniforms hash table based on uniform variable names and location IDs
+    UniformMap uniforms;
+    uniforms["u_Projection"] = PROJ;
 
-	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(HW2A, QString(":/hw2/vshader2a.glsl"), QString(":/hw2/fshader2a.glsl"), uniforms);
+    // compile shader, bind attribute vars, link shader, and initialize uniform var table
+    initShader(HW2A, QString(":/hw2/vshader2a.glsl"), QString(":/hw2/fshader2a.glsl"), uniforms);
 }
 
 
@@ -174,38 +198,38 @@ HW2a::initShaders()
 void
 HW2a::initVertexBuffer()
 {
-	float vv[] = {
-	        -0.5 , -0.75,
-	        -0.5 , -0.5 ,
-	        -0.5 , -0.25,
-	        -0.5 ,  0.0 ,
-	        -0.5 ,  0.25,
-	        -0.5 ,  0.5 ,
-	        -0.25,  0.75,
-	         0.0 ,  0.75,
-	         0.25,  0.75,
-	         0.5 ,  0.75,
-	         0.75 , 0.5 ,
-	         0.75,  0.25,
-	         0.5 ,  0.0 ,
-	         0.25,  0.0 ,
-	         0.0,   0.0 ,
-	        -0.25,  0.0 
-	};
-	std::vector<float> v (&vv[0], &vv[0]+sizeof(vv)/sizeof(float));
+    float vv[] = {
+            -0.5 , -0.75,
+            -0.5 , -0.5 ,
+            -0.5 , -0.25,
+            -0.5 ,  0.0 ,
+            -0.5 ,  0.25,
+            -0.5 ,  0.5 ,
+            -0.25,  0.75,
+             0.0 ,  0.75,
+             0.25,  0.75,
+             0.5 ,  0.75,
+             0.75 , 0.5 ,
+             0.75,  0.25,
+             0.5 ,  0.0 ,
+             0.25,  0.0 ,
+             0.0,   0.0 ,
+            -0.25,  0.0
+    };
+    std::vector<float> v (&vv[0], &vv[0]+sizeof(vv)/sizeof(float));
 
-	// init number of vertices
-	m_vertNum = (int) v.size() / 2;
+    // init number of vertices
+    m_vertNum = (int) v.size() / 2;
 
-	// create a vertex buffer
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
+    // create a vertex buffer
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
 
-	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, v.size()*sizeof(float), &v[0], GL_STATIC_DRAW);
+    // bind vertex buffer to the GPU and copy the vertices from CPU to GPU
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, v.size()*sizeof(float), &v[0], GL_STATIC_DRAW);
 
-	// enable vertex buffer to be accessed via the attribute vertex variable and specify data format
-	glEnableVertexAttribArray(ATTRIB_VERTEX);
-	glVertexAttribPointer	 (ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, 0);
+    // enable vertex buffer to be accessed via the attribute vertex variable and specify data format
+    glEnableVertexAttribArray(ATTRIB_VERTEX);
+    glVertexAttribPointer     (ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, 0);
 }
