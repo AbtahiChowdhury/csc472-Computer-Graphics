@@ -135,7 +135,6 @@ HW2a::paintGL()
     for(int i = 0; i < 9; i++){
         glViewport((i%3)*w, (i/3)*h, w, h);
         glDrawArrays(DrawModes[i], 0, m_vertNum);
-        
     }
     // disable vertex shader point size adjustment
     glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
