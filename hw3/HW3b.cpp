@@ -187,7 +187,7 @@ HW3b::paintGL()
 		glUniformMatrix4fv(m_uniform[WIRE_SHADER][VIEW], 1, GL_FALSE, m_camera->view().constData());
 		glUniformMatrix4fv(m_uniform[WIRE_SHADER][PROJ], 1, GL_FALSE, m_projection.constData());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[1]);
-		glDrawElements(GL_LINES, (GLsizei) m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_LINES, (GLsizei) m_indices_wireframe.size(), GL_UNSIGNED_SHORT, 0);
 		break;
 	case FLAT_COLOR:
 		glUseProgram(m_program[FLAT_SHADER].programId());	
@@ -386,31 +386,39 @@ HW3b::resetMesh()
 				vec.setZ(0.0f);
 				break;
 			case SPIKE:
-				vec.setZ((i==j && i==m_grid/2) ? 1.0f : 0.0f);
+				vec.setZ((i == j && i == m_grid / 2) ? 1.0f : 0.0f);
 				break;
 			case HOLE:
 				// PUT YOUR CODE HERE
+				vec.setZ((i >= m_grid / 3 && i <= (2 * m_grid) / 3) && (j >= m_grid / 3 && j <= (2 * m_grid) / 3) ? -0.5f : 0.0f);
 				break;
 			case DIAGONALWALL:
 				// PUT YOUR CODE HERE
+				vec.setZ(((m_grid - i == j) || (m_grid - i - 1 == j)) ? 0.5f : 0.0f);
 				break;
 			case SIDEWALL:
 				// PUT YOUR CODE HERE
+				vec.setZ((i == 1) ? 0.5f : 0.0f);
 				break;
 			case DIAGONALBLOCK:
 				// PUT YOUR CODE HERE
+				vec.setZ((m_grid - i <= j) ? 0.5f : 0.0f);
 				break;
 			case MIDDLEBLOCK:
 				// PUT YOUR CODE HERE
+				vec.setZ((i >= m_grid / 3 && i <= (2 * m_grid) / 3) && (j >= m_grid / 3 && j <= (2 * m_grid) / 3) ? 0.5f : 0.0f);
 				break;
 			case CORNERBLOCK:
 				// PUT YOUR CODE HERE
+				vec.setZ((i >= ((4 * m_grid) / 5) && j >= ((4 * m_grid) / 5)) ? 0.5f : 0.0f);
 				break;
 			case HILL:
 				// PUT YOUR CODE HERE
+				vec.setZ((sin(M_PI * ((float)i / m_grid)) + sin(M_PI * ((float)j / m_grid)))*0.3f);
 				break;
 			case HILLFOUR:
 				// PUT YOUR CODE HERE
+				vec.setZ((sin(M_PI * 2 * ((float)i / m_grid)) + sin(M_PI * 2 * ((float)j / m_grid)))*0.3f);
 				break;
 		}
 	   }
